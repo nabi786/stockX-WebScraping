@@ -84,7 +84,7 @@ const getScrapData = async (productName) => {
         console.log("this is erro", err.message);
       });
 
-    var sizeAndPrices = await getSizes(url);
+    // var sizeAndPrices = await getSizes(url);
     await new Promise((resolve) => {
       return setTimeout(resolve, 5000);
     });
