@@ -1,6 +1,7 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 
 //  // // // // // // // // // // // // // // // // // // //
 //
@@ -14,7 +15,11 @@ const puppeteer = require("puppeteer");
 // // // // // // // // // // // // // // // // // // // //
 var getSizes = async (url) => {
   try {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({
+      executablePath:
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      headless: "new",
+    });
     // scraping logic comes here…
     const page = await browser.newPage();
     await page.goto(url);
@@ -24,7 +29,7 @@ var getSizes = async (url) => {
     await page.click(".css-qip28k:last-child");
     await page.waitForSelector(".chakra-menu__menu-list");
     const dynamicData = await page.evaluate(() => {
-      const dataElement = document.querySelector(".chakra-menu__menu-list");
+      const dataElement = document.querySelector(".css-1o6kz7w");
       return dataElement.innerText;
     });
 
@@ -32,9 +37,11 @@ var getSizes = async (url) => {
     await browser.close();
 
     //  handle catch Error
-
+    // dynamicData = dynamicData.toString();
+    console.log("dynamicData", dynamicData);
     return { success: true, dynamicData };
   } catch (err) {
+    console.log("error in puputor pakcage", err);
     return { success: false, msg: "invalid Size and Prices" };
   }
 };
@@ -51,12 +58,15 @@ var getSizes = async (url) => {
 // // // // // // // // // // // // // // // // // // // //
 const getScrapData = async (productName) => {
   try {
-    var url = "https://stockx.com/nike-air-max-97-og-silver-bullet-2022";
+    var url = `https://stockx.com/${productName}`;
 
+    var lastSale;
     var productName;
     axios
       .get(url, {
         headers: {
+          Authorization: "stockx.com",
+          "Content-Type": "application/json, text/plain ",
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
         },
@@ -64,23 +74,31 @@ const getScrapData = async (productName) => {
       .then(async (response) => {
         let $ = cheerio.load(response.data);
 
-        var findName = $(".css-exht5z").text();
+        var findName = await $(".css-exht5z").text();
+        var lSale = await $(".css-wpoilv .css-13uklb6").text();
+        console.log("this is last Sale", lSale);
         productName = findName;
+        lastSale = lSale;
       })
       .catch((err) => {
         console.log("this is erro", err.message);
       });
 
     var sizeAndPrices = await getSizes(url);
+    await new Promise((resolve) => {
+      return setTimeout(resolve, 5000);
+    });
 
+    var sizeAndPrices = { success: true };
     if (sizeAndPrices.success == true) {
       return {
         success: true,
         Name: productName,
-        size: sizeAndPrices.dynamicData,
+        lastSale: lastSale,
+        // size: sizeAndPrices.dynamicData,
       };
     } else {
-      return { success: false, Name: productName, size: [] };
+      return { success: true, Name: productName, size: [] };
     }
   } catch (err) {
     return { success: false, msg: "Product Not Found with this name" };
@@ -100,18 +118,27 @@ const getScrapData = async (productName) => {
 
 const findProudctByName = async (req, res) => {
   try {
-    var productName = req.body.proudctName;
-    var result = await getScrapData();
+    var productName = req.body.productName;
+    console.log(productName);
+    productName = productName.replace(/\s+/g, "-").toLowerCase();
+    productName = productName.replace(")", "");
+    productName = productName.replace("(", "");
+    // console.log(productName);
+    var result = await getScrapData(productName);
 
     console.log("this is result", result);
     if (result.success == true) {
-      res
-        .status(200)
-        .json({ success: true, ProductName: result.Name, Size: result.size });
+      res.status(200).json({
+        success: true,
+        ProductName: result.Name,
+        lastSale: result.lastSale,
+        // Size: result.size,
+      });
     } else {
       res.status(404).json({ success: false, msg: result.msg });
     }
   } catch (err) {
+    console.log(err.message);
     res
       .status(500)
       .json({ success: false, msg: "something went wrong  from server" });
