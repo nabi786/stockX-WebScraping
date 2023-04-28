@@ -1,7 +1,7 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
-// const puppeteer = require("puppeteer");
-const puppeteer = require("puppeteer-core");
+const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer-core");
 
 //  // // // // // // // // // // // // // // // // // // //
 //
@@ -63,8 +63,9 @@ const getScrapData = async (productName) => {
     // load pupeteer
 
     const browser = await puppeteer.launch({
-      executablePath:
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      // executablePath:
+      //   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      args: ["--no-sandbox"],
       headless: false,
     });
     // scraping logic comes here…
