@@ -15,32 +15,6 @@ const puppeteer = require("puppeteer-core");
 // // // // // // // // // // // // // // // // // // // //
 var getSizes = async (url) => {
   try {
-    const browser = await puppeteer.launch({
-      executablePath:
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      args: ["--no-sandbox"],
-      headless: "new",
-    });
-    // scraping logic comes here…
-    const page = await browser.newPage();
-    await page.goto(url);
-
-    await page.click("#menu-button-pdp-size-selector");
-    await page.waitForSelector(".chakra-menu__menu-list");
-    await page.click(".css-qip28k:last-child");
-    await page.waitForSelector(".chakra-menu__menu-list");
-    const dynamicData = await page.evaluate(() => {
-      const dataElement = document.querySelector(".css-1o6kz7w");
-      return dataElement.innerText;
-    });
-
-    // console.log(dynamicData);
-    await browser.close();
-
-    //  handle catch Error
-    // dynamicData = dynamicData.toString();
-    console.log("dynamicData", dynamicData);
-    return { success: true, dynamicData };
   } catch (err) {
     console.log("error in puputor pakcage", err);
     return { success: false, msg: "invalid Size and Prices" };
@@ -63,6 +37,7 @@ const getScrapData = async (productName) => {
 
     var lastSale;
     var productName;
+    var sizeData;
     axios
       .get(url, {
         headers: {
@@ -85,23 +60,54 @@ const getScrapData = async (productName) => {
         console.log("this is erro", err.message);
       });
 
-    var sizeAndPrices = await getSizes(url);
-    await new Promise((resolve) => {
-      return setTimeout(resolve, 5000);
-    });
+    // load pupeteer
 
-    var sizeAndPrices = { success: true };
-    if (sizeAndPrices.success == true) {
-      return {
-        success: true,
-        Name: productName,
-        lastSale: lastSale,
-        // size: sizeAndPrices.dynamicData,
-      };
-    } else {
-      return { success: true, Name: productName, size: [] };
-    }
+    const browser = await puppeteer.launch({
+      executablePath:
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      headless: false,
+    });
+    // scraping logic comes here…
+    const page = await browser.newPage();
+    await page.goto(url);
+    await page.click("#menu-button-pdp-size-selector");
+    await page.waitForSelector(".chakra-menu__menu-list");
+    await page.click(".css-qip28k:last-child");
+    await page.waitForSelector(".chakra-menu__menu-list");
+    const dynamicData = await page.evaluate(() => {
+      const dataElement = document.querySelector(".css-1o6kz7w");
+      return dataElement.innerText;
+    });
+    // console.log(dynamicData);
+    await browser.close();
+    //  handle catch Error
+    // dynamicData = dynamicData.toString();
+    var array1 = Array.from(dynamicData);
+    var array = [];
+    var onELM = "";
+    array1.forEach((item, index) => {
+      if (item != "\n") {
+        onELM += item;
+      } else {
+        array.push(onELM);
+        onELM = "";
+      }
+    });
+    console.log(array);
+    sizeData = array;
+
+    // await new Promise((resolve) => {
+    //   return setTimeout(resolve, 10000);
+    // });
+    console.log("this is sizeData", sizeData);
+    return {
+      success: true,
+      Name: productName,
+      lastSale: lastSale,
+      size: array,
+    };
   } catch (err) {
+    console.log(err);
     return { success: false, msg: "Product Not Found with this name" };
   }
 };
@@ -133,7 +139,7 @@ const findProudctByName = async (req, res) => {
         success: true,
         ProductName: result.Name,
         lastSale: result.lastSale,
-        // Size: result.size,
+        Size: result.size,
       });
     } else {
       res.status(404).json({ success: false, msg: result.msg });

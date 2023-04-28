@@ -19,6 +19,7 @@
     "mongoose": "^7.0.4",
     "nodemon": "^2.0.22",
     "puppeteer-core": "^19.11.1",
-    "request-promise": "^4.2.6"
+    "request-promise": "^4.2.6",
+    "scraperjs": "^1.2.0"
   }
 }
