@@ -64,9 +64,9 @@ const getScrapData = async (productName) => {
 
     const browser = await puppeteer.launch({
       // executablePath:
-      //   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      args: ["--no-sandbox"],
-      headless: false,
+      // "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      headless: "new",
     });
     // scraping logic comes here…
     const page = await browser.newPage();
