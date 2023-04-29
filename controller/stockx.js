@@ -1,7 +1,17 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
-// const puppeteer = require("puppeteer-core");
+// const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
+
+//
+const convertCurrency = (symbol, Amount) => {
+  var exchangeRateEuroPrice = "0.90";
+  var euroSymbol = "€";
+  if (symbol == "$") {
+    const convertedAmount = Number(Amount) * Number(exchangeRateEuroPrice);
+    return euroSymbol + convertedAmount;
+  }
+};
 
 //  // // // // // // // // // // // // // // // // // // //
 //
@@ -35,7 +45,7 @@ const getScrapData = async (productName) => {
   try {
     var url = `https://stockx.com/${productName}`;
 
-    var lastSale;
+    var retailPrice;
     var productName;
     var sizeData;
     axios
@@ -51,10 +61,20 @@ const getScrapData = async (productName) => {
         let $ = cheerio.load(response.data);
 
         var findName = await $(".css-exht5z").text();
-        var lSale = await $(".css-wpoilv .css-13uklb6").text();
-        console.log("this is last Sale", lSale);
+
         productName = findName;
-        lastSale = lSale;
+        var lSale = $(".css-wgsjnl").text();
+        // console.log("this is is the RetialPrice", lSale);
+        lSale = lSale.split("$");
+        lSale = lSale[lSale.length - 1];
+        lSale = lSale.split("/");
+        lSale = lSale[0];
+        if (lSale.includes("/")) {
+          lSale = Math.floor(Number(lSale) / 100);
+        }
+        console.log("lSale", lSale);
+        var price = convertCurrency("$", lSale);
+        retailPrice = price;
       })
       .catch((err) => {
         console.log("this is erro", err.message);
@@ -63,22 +83,27 @@ const getScrapData = async (productName) => {
     // load pupeteer
 
     const browser = await puppeteer.launch({
-      // executablePath:
-      // "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-      headless: "new",
+      executablePath:
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      headless: false,
     });
     // scraping logic comes here…
     const page = await browser.newPage();
     await page.goto(url);
     await page.click("#menu-button-pdp-size-selector");
     await page.waitForSelector(".chakra-menu__menu-list");
+
+    // var elm = $(".css-1v4g4sv");
+
+    var dynamicData;
+
     await page.click(".css-qip28k:last-child");
     await page.waitForSelector(".chakra-menu__menu-list");
-    const dynamicData = await page.evaluate(() => {
+    dynamicData = await page.evaluate(() => {
       const dataElement = document.querySelector(".css-1o6kz7w");
       return dataElement.innerText;
     });
+
     // console.log(dynamicData);
     await browser.close();
     //  handle catch Error
@@ -94,17 +119,17 @@ const getScrapData = async (productName) => {
         onELM = "";
       }
     });
-    console.log(array);
+    // console.log(array);
     sizeData = array;
 
     // await new Promise((resolve) => {
     //   return setTimeout(resolve, 10000);
     // });
-    console.log("this is sizeData", sizeData);
+    // console.log("this is sizeData", sizeData);
     return {
       success: true,
       Name: productName,
-      lastSale: lastSale,
+      retailPrice: retailPrice,
       size: array,
     };
   } catch (err) {
@@ -139,7 +164,7 @@ const findProudctByName = async (req, res) => {
       res.status(200).json({
         success: true,
         ProductName: result.Name,
-        lastSale: result.lastSale,
+        RetailPrice: result.retailPrice,
         Size: result.size,
       });
     } else {
