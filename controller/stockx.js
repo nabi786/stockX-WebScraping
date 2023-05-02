@@ -116,92 +116,76 @@ const getScrapData = async (productName) => {
 
       // var elm = $(".css-1v4g4sv");
 
-      var buttonStack = await page.evaluate(() => {
-        const dataElement = document.querySelector(".css-1v4g4sv");
+      var sizesArry = [];
+      const sizeButtons = await page.$$(".css-qip28k");
 
-        return dataElement.innerText;
-      });
+      const alreadySizedButtosn = await page.$$(
+        ".css-1kgaafq .css-1o6kz7w button"
+      );
 
-      if (buttonStack.length > 2) {
-        var stackItems = Array.from(buttonStack);
-        var emptyStr = "";
-        stackItems.forEach((item, index) => {
-          if (item != "\n") {
-            emptyStr += item;
-          } else {
-            emptyStr += "/";
+      console.log("sizeButtons", alreadySizedButtosn.length);
+      for (var x = 0; x < alreadySizedButtosn.length; x++) {
+        var elmIndex = x + 1;
+        var data = await page.$eval(
+          `.css-1kgaafq .css-1o6kz7w button:nth-child(${elmIndex})`,
+          (data) => data.textContent
+        );
+        sizesArry.push(data);
+      }
+      console.log("these are items", sizesArry);
+
+      if (sizeButtons.length != 0) {
+        for (let button of sizeButtons) {
+          await button.click();
+
+          await page.waitForSelector(".css-1kgaafq");
+          const sizeButtonsOneByOne = await page.$$(
+            ".css-1kgaafq .css-1o6kz7w button"
+          );
+
+          console.log("length of buttons", sizeButtonsOneByOne.length);
+
+          // sized for other buttions
+          for (var x = 0; x < sizeButtonsOneByOne.length; x++) {
+            var elmIndex = x + 1;
+            var data = await page.$eval(
+              `.css-1kgaafq .css-1o6kz7w button:nth-child(${elmIndex})`,
+              (data) => data.textContent
+            );
+            sizesArry.push(data);
           }
-        });
-        var emptyAry = emptyStr.split("/");
-        console.log("this is empty Ar ", emptyAry);
-        var isElmAvailble = [
-          { isVal: false, value: 1 },
-          { isVal: false, value: 2 },
-          { isVal: false, value: 3 },
-          { isVal: false, value: 4 },
-          { isVal: false, value: 5 },
-          { isVal: false, value: 6 },
-          { isVal: false, value: 8 },
-          { isVal: false, value: 9 },
-        ];
+        }
 
-        await page.click(`.css-qip28k:nth-child(2)`);
-        await page.waitForSelector(".chakra-menu__menu-list");
-        var dynamicData = await page.evaluate(() => {
-          const dataElement = document.querySelector(".css-1o6kz7w");
-          return dataElement.innerText;
-        });
-
-        // console.log(dynamicData);
-        //  handle catch Error
-        // dynamicData = dynamicData.toString();
-        var array1 = Array.from(dynamicData);
-        var array = [];
-        var onELM = "";
-        array1.forEach((item, index) => {
-          if (item != "\n") {
-            onELM += item;
-          } else {
-            onELM += "/";
-          }
-        });
-        onELM = onELM.split("/");
-        sizeData.push(onELM);
-        // }
-        console.log(sizeData);
+        sizeData = sizesArry;
         await browser.close();
       } else {
-        dynamicData = await page.evaluate(() => {
-          const dataElement = document.querySelector(".css-1o6kz7w");
-          return dataElement.innerText;
-        });
-
+        sizeData = sizesArry;
         await browser.close();
-        var array1 = Array.from(dynamicData);
-        var array = [];
-        var onELM = "";
-        array1.forEach((item, index) => {
-          if (item != "\n") {
-            onELM += item;
-          } else {
-            array.push(onELM);
-            onELM = "";
-          }
-        });
-        // console.log(array);
-        sizeData = array;
-        console.log("stack of size buttions not availables");
       }
     } else {
       sizeData = [];
       await browser.close();
     }
 
+    var exactSizesEU = [];
+    var exactSizesUS = [];
+
+    // getting sized of EU
+    console.log("tehse are sized", sizeData);
+    sizeData.forEach((item, inex) => {
+      if (item.includes("EU")) {
+        exactSizesEU.push(item);
+      } else if (item.includes("US")) {
+        exactSizesUS.push(item);
+      }
+    });
+
     return {
       success: true,
       Name: productName,
       retailPrice: retailPrice,
-      size: sizeData,
+      sizeEU: exactSizesEU,
+      sizeUS: exactSizesUS,
     };
   } catch (err) {
     console.log(err);
@@ -236,7 +220,8 @@ const findProudctByName = async (req, res) => {
         success: true,
         ProductName: result.Name,
         RetailPrice: result.retailPrice,
-        Size: result.size,
+        sizeEU: result.sizeEU,
+        sizeUS: result.sizeUS,
       });
     } else {
       res.status(404).json({ success: false, msg: result.msg });
