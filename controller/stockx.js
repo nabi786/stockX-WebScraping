@@ -2,11 +2,15 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 // const puppeteer = require("puppeteer");
 const puppeteer = require("puppeteer-core");
+const StockXAPI = require("stockx-api");
 
 //
 const convertCurrency = (symbol, Amount) => {
   var exchangeRateEuroPrice = "0.90";
   var euroSymbol = "€";
+
+  Amount = Amount.replace(",", "");
+  console.log("Amount is usd", Number(Amount));
   if (symbol == "$") {
     const convertedAmount = Number(Amount) * Number(exchangeRateEuroPrice);
     return euroSymbol + convertedAmount;
@@ -47,7 +51,9 @@ const getScrapData = async (productName) => {
 
     var retailPrice;
     var productName;
-    var sizeData;
+    var sizeData = [];
+    var responseData;
+    var isEmlAvail = true;
     axios
       .get(url, {
         headers: {
@@ -58,30 +64,43 @@ const getScrapData = async (productName) => {
         },
       })
       .then(async (response) => {
-        let $ = cheerio.load(response.data);
-
-        var findName = await $(".css-exht5z").text();
-
-        productName = findName;
-        var lSale = $(".css-wgsjnl").text();
-        // console.log("this is is the RetialPrice", lSale);
-        lSale = lSale.split("$");
-        lSale = lSale[lSale.length - 1];
-        lSale = lSale.split("/");
-        lSale = lSale[0];
-        if (lSale.includes("/")) {
-          lSale = Math.floor(Number(lSale) / 100);
-        }
-        console.log("lSale", lSale);
-        var price = convertCurrency("$", lSale);
-        retailPrice = price;
+        responseData = response.data;
       })
       .catch((err) => {
         console.log("this is erro", err.message);
       });
 
-    // load pupeteer
+    await new Promise((resolve) => {
+      return setTimeout(resolve, 5000);
+    });
 
+    let $ = cheerio.load(responseData);
+    var findName = await $(".css-exht5z").text();
+
+    productName = findName;
+    var elements;
+    if ($(".css-1ufjsin").length) {
+      elements = $(".css-1ufjsin");
+    } else {
+      elements = $(".css-101wtdy");
+    }
+
+    var lSale = "";
+    elements.each((index, element) => {
+      var innerText = $(element).text();
+      // console.log("innerText", innerText);
+      if (innerText.includes("Retail Price") == true) {
+        lSale = innerText;
+      }
+    });
+
+    lSale = lSale.split("$");
+    lSale = lSale[1];
+    console.log("lSale price", lSale);
+    var price = convertCurrency("$", lSale);
+    retailPrice = price;
+
+    // pupeteer package
     const browser = await puppeteer.launch({
       executablePath:
         "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
@@ -90,47 +109,99 @@ const getScrapData = async (productName) => {
     // scraping logic comes here…
     const page = await browser.newPage();
     await page.goto(url);
-    await page.click("#menu-button-pdp-size-selector");
-    await page.waitForSelector(".chakra-menu__menu-list");
 
-    // var elm = $(".css-1v4g4sv");
+    if ($("#menu-button-pdp-size-selector").length) {
+      await page.click("#menu-button-pdp-size-selector");
+      await page.waitForSelector(".chakra-menu__menu-list");
 
-    var dynamicData;
+      // var elm = $(".css-1v4g4sv");
 
-    await page.click(".css-qip28k:last-child");
-    await page.waitForSelector(".chakra-menu__menu-list");
-    dynamicData = await page.evaluate(() => {
-      const dataElement = document.querySelector(".css-1o6kz7w");
-      return dataElement.innerText;
-    });
+      var buttonStack = await page.evaluate(() => {
+        const dataElement = document.querySelector(".css-1v4g4sv");
 
-    // console.log(dynamicData);
-    await browser.close();
-    //  handle catch Error
-    // dynamicData = dynamicData.toString();
-    var array1 = Array.from(dynamicData);
-    var array = [];
-    var onELM = "";
-    array1.forEach((item, index) => {
-      if (item != "\n") {
-        onELM += item;
+        return dataElement.innerText;
+      });
+
+      if (buttonStack.length > 2) {
+        var stackItems = Array.from(buttonStack);
+        var emptyStr = "";
+        stackItems.forEach((item, index) => {
+          if (item != "\n") {
+            emptyStr += item;
+          } else {
+            emptyStr += "/";
+          }
+        });
+        var emptyAry = emptyStr.split("/");
+        console.log("this is empty Ar ", emptyAry);
+        var isElmAvailble = [
+          { isVal: false, value: 1 },
+          { isVal: false, value: 2 },
+          { isVal: false, value: 3 },
+          { isVal: false, value: 4 },
+          { isVal: false, value: 5 },
+          { isVal: false, value: 6 },
+          { isVal: false, value: 8 },
+          { isVal: false, value: 9 },
+        ];
+
+        await page.click(`.css-qip28k:nth-child(2)`);
+        await page.waitForSelector(".chakra-menu__menu-list");
+        var dynamicData = await page.evaluate(() => {
+          const dataElement = document.querySelector(".css-1o6kz7w");
+          return dataElement.innerText;
+        });
+
+        // console.log(dynamicData);
+        //  handle catch Error
+        // dynamicData = dynamicData.toString();
+        var array1 = Array.from(dynamicData);
+        var array = [];
+        var onELM = "";
+        array1.forEach((item, index) => {
+          if (item != "\n") {
+            onELM += item;
+          } else {
+            onELM += "/";
+          }
+        });
+        onELM = onELM.split("/");
+        sizeData.push(onELM);
+        // }
+        console.log(sizeData);
+        await browser.close();
       } else {
-        array.push(onELM);
-        onELM = "";
-      }
-    });
-    // console.log(array);
-    sizeData = array;
+        dynamicData = await page.evaluate(() => {
+          const dataElement = document.querySelector(".css-1o6kz7w");
+          return dataElement.innerText;
+        });
 
-    // await new Promise((resolve) => {
-    //   return setTimeout(resolve, 10000);
-    // });
-    // console.log("this is sizeData", sizeData);
+        await browser.close();
+        var array1 = Array.from(dynamicData);
+        var array = [];
+        var onELM = "";
+        array1.forEach((item, index) => {
+          if (item != "\n") {
+            onELM += item;
+          } else {
+            array.push(onELM);
+            onELM = "";
+          }
+        });
+        // console.log(array);
+        sizeData = array;
+        console.log("stack of size buttions not availables");
+      }
+    } else {
+      sizeData = [];
+      await browser.close();
+    }
+
     return {
       success: true,
       Name: productName,
       retailPrice: retailPrice,
-      size: array,
+      size: sizeData,
     };
   } catch (err) {
     console.log(err);
