@@ -4,12 +4,9 @@ const axios = require("axios");
 // const puppeteer = require("puppeteer-core");
 var chrome = {};
 var puppeteer;
-if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-  chrome = require("chrome-aws-lambda");
-  puppeteer = require("puppeteer-core");
-} else {
-  puppeteer = require("puppeteer");
-}
+
+chrome = require("chrome-aws-lambda");
+puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -109,15 +106,15 @@ const getScrapData = async (productName) => {
 
     // pupeteer package
     var options = {};
-    if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-      options = {
-        args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-        defaultViewport: chrome.defaultViewport,
-        executablePath: await chrome.executablePath,
-        headless: "new",
-        ignoreHTTPSErrors: true,
-      };
-    }
+
+    options = {
+      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+      defaultViewport: chrome.defaultViewport,
+      executablePath: await chrome.executablePath,
+      headless: "new",
+      ignoreHTTPSErrors: true,
+    };
+
     const browser = await puppeteer.launch(options);
     // scraping logic comes her
     const page = await browser.newPage();
