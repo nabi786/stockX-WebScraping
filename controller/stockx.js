@@ -1,8 +1,7 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
-// const puppeteer = require("puppeteer");
-const puppeteer = require("puppeteer-core");
-const chromium = require("chromium");
+const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -103,12 +102,12 @@ const getScrapData = async (productName) => {
     console.log("this is chromium path ", chromium.path);
     // pupeteer package
     const browser = await puppeteer.launch({
-      executablePath: chromium.path,
       headless: "new",
+      args: ["--no-sandbox"],
     });
     // scraping logic comes her
     const page = await browser.newPage();
-    await page.goto(url);
+    await page.goto(url, { waitUntil: "networkidle2" });
 
     if ($("#menu-button-pdp-size-selector").length) {
       await page.click("#menu-button-pdp-size-selector");
