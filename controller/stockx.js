@@ -1,7 +1,8 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
-// const puppeteer = require("puppeteer-core");
+// const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
+const chromium = require("chromium");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -99,11 +100,11 @@ const getScrapData = async (productName) => {
     var price = convertCurrency("$", lSale);
     retailPrice = price;
 
+    console.log("this is chromium path ", chromium.path);
     // pupeteer package
-    // executablePath:
-    //   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     const browser = await puppeteer.launch({
-      headless: "new",
+      executablePath: chromium.path,
+      headless: false,
     });
     // scraping logic comes here…
     const page = await browser.newPage();
