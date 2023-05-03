@@ -112,6 +112,7 @@ const getScrapData = async (productName) => {
         process.env.NODE_ENV === "production"
           ? process.env.PUPPETEER_EXECUTABLE_PATH
           : puppeteer.executablePath(),
+      headless: "new",
     });
     // scraping logic comes her
     const page = await browser.newPage();
