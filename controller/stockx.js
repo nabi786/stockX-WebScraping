@@ -1,8 +1,7 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
-// const puppeteer = require("puppeteer");
-const puppeteer = require("puppeteer-core");
-const StockXAPI = require("stockx-api");
+const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {

@@ -21,9 +21,6 @@
     "nodemon": "^2.0.22",
     "puppeteer": "^19.11.1",
     "puppeteer-core": "^19.11.1",
-    "request-promise": "^4.2.6",
-    "scraperjs": "^1.2.0",
-    "stockx-api": "^1.1.0",
-    "stockx-scraper": "^2.2.2"
+    "request-promise": "^4.2.6"
   }
 }
