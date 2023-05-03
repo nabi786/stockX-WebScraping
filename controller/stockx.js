@@ -106,7 +106,7 @@ const getScrapData = async (productName) => {
       executablePath: chromium.path,
       headless: "new",
     });
-    // scraping logic comes here
+    // scraping logic comes her
     const page = await browser.newPage();
     await page.goto(url);
 
