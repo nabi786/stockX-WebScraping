@@ -1,7 +1,15 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer");
 // const puppeteer = require("puppeteer-core");
+var chrome = {};
+var puppeteer;
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+  chrome = require("chrome-aws-lambda");
+  puppeteer = require("puppeteer-core");
+} else {
+  puppeteer = require("puppeteer");
+}
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -99,12 +107,18 @@ const getScrapData = async (productName) => {
     var price = convertCurrency("$", lSale);
     retailPrice = price;
 
-    console.log("this is chromium path ", chromium.path);
     // pupeteer package
-    const browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox"],
-    });
+    var options = {};
+    if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+      options = {
+        args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+        defaultViewport: chrome.defaultViewport,
+        executablePath: await chrome.executablePath,
+        headless: "new",
+        ignoreHTTPSErrors: true,
+      };
+    }
+    const browser = await puppeteer.launch(options);
     // scraping logic comes her
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: "networkidle2" });
