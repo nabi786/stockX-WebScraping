@@ -1,12 +1,7 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
-// const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer");
 // const puppeteer = require("puppeteer-core");
-var chrome = {};
-var puppeteer;
-
-chrome = require("chrome-aws-lambda");
-puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -105,17 +100,19 @@ const getScrapData = async (productName) => {
     retailPrice = price;
 
     // pupeteer package
-    var options = {};
 
-    options = {
-      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath,
-      headless: "new",
-      ignoreHTTPSErrors: true,
-    };
-
-    const browser = await puppeteer.launch(options);
+    const browser = await puppeteer.launch({
+      args: [
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+        "--single-process",
+        "--no-zygote",
+      ],
+      executablePath:
+        process.env.NODE_ENV === "production"
+          ? process.env.PUPPETEER_EXECUTABLE_PATH
+          : puppeteer.executablePath(),
+    });
     // scraping logic comes her
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: "networkidle2" });
