@@ -104,7 +104,7 @@ const getScrapData = async (productName) => {
     // pupeteer package
     const browser = await puppeteer.launch({
       executablePath: chromium.path,
-      headless: false,
+      headless: "new",
     });
     // scraping logic comes here…
     const page = await browser.newPage();
