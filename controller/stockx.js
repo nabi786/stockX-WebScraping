@@ -101,10 +101,10 @@ const getScrapData = async (productName) => {
     retailPrice = price;
 
     // pupeteer package
+    // executablePath:
+    //   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     const browser = await puppeteer.launch({
-      executablePath:
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      headless: false,
+      headless: "new",
     });
     // scraping logic comes here…
     const page = await browser.newPage();
