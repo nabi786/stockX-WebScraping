@@ -117,7 +117,7 @@ const getScrapData = async (productName) => {
       ],
       executablePath:
         process.env.NODE_ENV === "production"
-          ? await chromium.path
+          ? process.env.PUPPETEER_EXECUTABLE_PATH
           : puppeteer.executablePath(),
       headless: "new",
     });
