@@ -1,9 +1,10 @@
 require("dotenv").config();
 const cheerio = require("cheerio");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer");
 const sizeChat = require("../ProductsSizes/SizesChart");
-// const puppeteer = require("puppeteer-core");
+// const chromium = require("chromium");
+const puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -109,20 +110,19 @@ const getScrapData = async (productName) => {
 
     const browser = await puppeteer.launch({
       args: [
-        "--disable-setuid-sandbox",
+        //   "--disable-setuid-sandbox",
         "--no-sandbox",
-        "--single-process",
-        "--no-zygote",
+        //   "--single-process",
+        //   "--no-zygote",
       ],
-      executablePath:
-        process.env.NODE_ENV === "production"
-          ? process.env.PUPPETEER_EXECUTABLE_PATH
-          : puppeteer.executablePath(),
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+
       headless: "new",
     });
+
     // scraping logic comes her
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "networkidle2" });
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 10000 });
 
     if ($("#menu-button-pdp-size-selector").length) {
       await page.click("#menu-button-pdp-size-selector");
