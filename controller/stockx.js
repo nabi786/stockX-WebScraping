@@ -3,6 +3,7 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 const puppeteer = require("puppeteer");
 const sizeChat = require("../ProductsSizes/SizesChart");
+const chromium = require("chromium");
 // const puppeteer = require("puppeteer-core");
 
 //
@@ -116,7 +117,7 @@ const getScrapData = async (productName) => {
       ],
       executablePath:
         process.env.NODE_ENV === "production"
-          ? process.env.PUPPETEER_EXECUTABLE_PATH
+          ? await chromium.path
           : puppeteer.executablePath(),
       headless: "new",
     });
