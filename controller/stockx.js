@@ -1,10 +1,10 @@
 require("dotenv").config();
 const cheerio = require("cheerio");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer");
 
 const sizeChat = require("../ProductsSizes/SizesChart");
-// const puppeteer = require("puppeteer-core");
+const puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {
