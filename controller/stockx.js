@@ -1,9 +1,9 @@
 require("dotenv").config();
 const cheerio = require("cheerio");
 const axios = require("axios");
-// const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer");
 const sizeChat = require("../ProductsSizes/SizesChart");
-const puppeteer = require("puppeteer-core");
+// const puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -115,8 +115,9 @@ const getScrapData = async (productName) => {
         "--no-zygote",
       ],
       executablePath:
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-
+        process.env.NODE_ENV === "production"
+          ? process.env.PUPPETEER_EXECUTABLE_PATH
+          : puppeteer.executablePath(),
       headless: "new",
     });
     // scraping logic comes her
