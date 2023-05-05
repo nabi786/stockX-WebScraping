@@ -1,7 +1,7 @@
+require("dotenv").config();
 const cheerio = require("cheerio");
 const axios = require("axios");
 // const puppeteer = require("puppeteer");
-require("dotenv").config();
 const sizeChat = require("../ProductsSizes/SizesChart");
 const puppeteer = require("puppeteer-core");
 
@@ -116,7 +116,7 @@ const getScrapData = async (productName) => {
       ],
       executablePath:
         process.env.NODE_ENV === "production"
-          ? process.env.PUPPETEER_EXECUTABLE_PATH
+          ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
           : puppeteer.executablePath(),
       headless: "new",
     });
