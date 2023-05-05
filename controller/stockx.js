@@ -106,7 +106,7 @@ const getScrapData = async (productName) => {
     retailPrice = price;
 
     console.log("this is Path ", process.env.PUPPETEER_EXECUTABLE_PATH);
-    // pupeteer package
+    // pupeteer package s
 
     const browser = await puppeteer.launch({
       args: [
