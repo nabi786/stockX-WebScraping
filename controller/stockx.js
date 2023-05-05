@@ -1,9 +1,10 @@
+require("dotenv").config();
 const cheerio = require("cheerio");
 const axios = require("axios");
-// const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer");
 
 const sizeChat = require("../ProductsSizes/SizesChart");
-const puppeteer = require("puppeteer-core");
+// const puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -104,6 +105,7 @@ const getScrapData = async (productName) => {
     var price = convertCurrency("$", lSale);
     retailPrice = price;
 
+    console.log("this is Path ", process.env.PUPPETEER_EXECUTABLE_PATH);
     // pupeteer package
 
     const browser = await puppeteer.launch({
