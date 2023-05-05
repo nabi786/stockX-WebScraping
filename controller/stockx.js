@@ -110,7 +110,7 @@ const getScrapData = async (productName) => {
 
     const browser = await puppeteer.launch({
       args: [
-        //   "--disable-setuid-sandbox",
+        "--disable-setuid-sandbox",
         "--no-sandbox",
         //   "--single-process",
         //   "--no-zygote",
