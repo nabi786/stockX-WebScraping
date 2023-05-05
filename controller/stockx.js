@@ -115,9 +115,8 @@ const getScrapData = async (productName) => {
         "--no-zygote",
       ],
       executablePath:
-        process.env.NODE_ENV === "production"
-          ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-          : puppeteer.executablePath(),
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+
       headless: "new",
     });
     // scraping logic comes her
