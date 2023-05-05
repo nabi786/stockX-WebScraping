@@ -3,7 +3,6 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 const puppeteer = require("puppeteer");
 const sizeChat = require("../ProductsSizes/SizesChart");
-const chromium = require("chromium");
 // const puppeteer = require("puppeteer-core");
 
 //
