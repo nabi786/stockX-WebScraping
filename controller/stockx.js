@@ -1,6 +1,8 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
 const puppeteer = require("puppeteer");
+
+const sizeChat = require("../ProductsSizes/SizesChart");
 // const puppeteer = require("puppeteer-core");
 
 //
@@ -52,7 +54,7 @@ const getScrapData = async (productName) => {
     var productName;
     var sizeData = [];
     var responseData;
-    var isEmlAvail = true;
+    var CategoryName;
     axios
       .get(url, {
         headers: {
@@ -75,8 +77,11 @@ const getScrapData = async (productName) => {
 
     let $ = cheerio.load(responseData);
     var findName = await $(".css-exht5z").text();
-
     productName = findName;
+    var CategoryName = await $(
+      ".chakra-breadcrumb ol li:nth-child(4) a"
+    ).text();
+
     var elements;
     if ($(".css-1ufjsin").length) {
       elements = $(".css-1ufjsin");
@@ -140,7 +145,6 @@ const getScrapData = async (productName) => {
         );
         sizesArry.push(data);
       }
-      console.log("these are items", sizesArry);
 
       if (sizeButtons.length != 0) {
         for (let button of sizeButtons) {
@@ -179,14 +183,28 @@ const getScrapData = async (productName) => {
     var exactSizesUS = [];
 
     // getting sized of EU
-    console.log("tehse are sized", sizeData);
+
+    console.log("sizeData", sizeData);
     sizeData.forEach((item, inex) => {
-      if (item.includes("EU")) {
+      if (item.search("EU") != -1) {
         exactSizesEU.push(item);
-      } else if (item.includes("US")) {
-        exactSizesUS.push(item);
       }
     });
+
+    CategoryName = CategoryName.toLowerCase();
+    console.log("exactSizesEU ", exactSizesEU);
+    if (exactSizesEU.length == 0) {
+      // var sizesArrayByCategory = sizeChat.CategoryName;
+      var chartTableArry = sizeChat.sizechart;
+
+      chartTableArry.forEach((item, index) => {
+        if (item[0] == CategoryName) {
+          item[1].forEach((item2, index) => {
+            exactSizesEU.push(item2);
+          });
+        }
+      });
+    }
 
     return {
       success: true,
@@ -197,7 +215,7 @@ const getScrapData = async (productName) => {
     };
   } catch (err) {
     console.log(err);
-    return { success: false, msg: "Product Not Found with this name" };
+    return { success: false, msg: err.message };
   }
 };
 
