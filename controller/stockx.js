@@ -5,6 +5,7 @@ const axios = require("axios");
 const sizeChat = require("../ProductsSizes/SizesChart");
 // const chromium = require("chromium");
 const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -109,15 +110,10 @@ const getScrapData = async (productName) => {
     // pupeteer package s
 
     const browser = await puppeteer.launch({
-      args: [
-        "--disable-setuid-sandbox",
-        "--no-sandbox",
-        //   "--single-process",
-        //   "--no-zygote",
-      ],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-
-      headless: "new",
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
 
     // scraping logic comes her
