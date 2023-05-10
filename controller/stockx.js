@@ -1,10 +1,9 @@
 require("dotenv").config();
 const cheerio = require("cheerio");
 const axios = require("axios");
-
+// const puppeteer = require("puppeteer");
 const sizeChat = require("../ProductsSizes/SizesChart");
-
-const chromium = require("chrome-aws-lambda");
+const puppeteer = require("puppeteer-core");
 
 //
 const convertCurrency = (symbol, Amount) => {
@@ -106,22 +105,23 @@ const getScrapData = async (productName) => {
     retailPrice = price;
 
     console.log("this is Path ", process.env.PUPPETEER_EXECUTABLE_PATH);
-    // pupeteer package s
+    // pupeteer package and also working
 
-    browser = await chromium.puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
+    const browser = await puppeteer.launch({
+      args: [
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+        "--no-zygote",
+      ],
+      ignoreDefaultArgs: ['--disable-extensions'],
+      executablePath:
+      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      
+      headless: "new",
     });
-
     // scraping logic comes her
     const page = await browser.newPage();
-    await page.goto(event.url || url, {
-      waitUntil: "networkidle2",
-      timeout: 10000,
-    });
+    await page.goto(url, { waitUntil: "networkidle2" });
 
     if ($("#menu-button-pdp-size-selector").length) {
       await page.click("#menu-button-pdp-size-selector");
