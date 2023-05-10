@@ -1,7 +1,7 @@
 require("dotenv").config();
 const cheerio = require("cheerio");
 const axios = require("axios");
-// const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer"); working sfdf
 const sizeChat = require("../ProductsSizes/SizesChart");
 const puppeteer = require("puppeteer-core");
 
